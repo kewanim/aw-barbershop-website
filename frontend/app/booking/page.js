@@ -91,7 +91,7 @@ function BookingForm() {
       next.customerEmail = "Please enter a valid email.";
     if (!form.customerPhone.trim()) next.customerPhone = "Please enter a phone number.";
     if (!form.serviceId) next.serviceId = "Please choose a service.";
-    if (!form.barberId) next.barberId = "Please choose a barber.";
+    if (!form.barberId) next.barberId = "Please choose a stylist or barber.";
     if (!form.date) next.date = "Please pick a date.";
     if (!form.time) next.time = "Please pick a time.";
     setErrors(next);
@@ -253,14 +253,14 @@ function BookingForm() {
           </select>
         </Field>
 
-        {/* Barber */}
-        <Field label="Barber" error={errors.barberId}>
+        {/* Stylist / Barber */}
+        <Field label="Stylist / Barber" error={errors.barberId}>
           <select
             value={form.barberId}
             onChange={(e) => updateField("barberId", e.target.value)}
             className={inputClass(errors.barberId)}
           >
-            <option value="">Choose a barber…</option>
+            <option value="">Choose a stylist or barber…</option>
             {availableBarbers.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name} — {b.title}

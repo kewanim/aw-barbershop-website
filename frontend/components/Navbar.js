@@ -22,7 +22,7 @@ export default function Navbar() {
         {/* Brand / logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
           <span className="text-brand-gold">✂</span>
-          <span>AW Barbershop</span>
+          <span>AW Beauty Salon</span>
         </Link>
 
         {/* Desktop links */}

@@ -15,16 +15,19 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 md:grid-cols-2 md:items-center md:py-28">
           <div>
             <p className="mb-3 font-semibold uppercase tracking-widest text-brand-gold">
-              Est. 2024 · Downtown
+              Silver Spring, MD
             </p>
             <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">
-              Sharp Cuts.
+              Where hair dreams
               <br />
-              <span className="text-brand-gold">Classic Service.</span>
+              become reality
+              <br />
+              <span className="text-brand-gold">for men &amp; women.</span>
             </h1>
             <p className="mt-5 max-w-md text-lg text-gray-300">
-              Master barbers, modern style, and a clean chair waiting for you.
-              Book your next cut online in under a minute.
+              Step into a world of luxury and style in the heart of Silver Spring.
+              We&apos;re a destination dedicated to perfecting your hair with
+              precision, passion, and personalized care.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link href="/booking" className="btn-primary">Book an Appointment</Link>
@@ -32,16 +35,16 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Decorative stat cards */}
+          {/* Stat cards — highlight what's true about the salon */}
           <div className="grid grid-cols-2 gap-4">
             {[
-              { stat: "15+", label: "Years Experience" },
-              { stat: "3", label: "Master Barbers" },
-              { stat: "4.9★", label: "Average Rating" },
-              { stat: "10k+", label: "Cuts & Counting" },
+              { stat: "Men & Women", label: "All hair types welcome" },
+              { stat: "Walk-ins", label: "Welcome, subject to availability" },
+              { stat: "Silver Spring", label: "908 Thayer Ave, MD" },
+              { stat: "Book Online", label: "Reserve in seconds" },
             ].map((item) => (
               <div key={item.label} className="rounded-2xl bg-brand-slate p-6 text-center shadow-lg">
-                <div className="text-3xl font-bold text-brand-gold">{item.stat}</div>
+                <div className="text-2xl font-bold text-brand-gold">{item.stat}</div>
                 <div className="mt-1 text-sm text-gray-300">{item.label}</div>
               </div>
             ))}
@@ -117,11 +120,49 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ---------------- Testimonials (real Google reviews) ---------------- */}
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="mb-10 text-center">
+          <h2 className="section-title">What Clients Say</h2>
+          <p className="mt-3 text-gray-600 dark:text-gray-300">
+            Loved by the Silver Spring community.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {[
+            {
+              quote:
+                "I love this place! The staff is incredible, and Joseph is an amazing hair stylist. Prices are affordable — one of the best places to get your hair done in the Silver Spring community.",
+              name: "Monica B.",
+              source: "Google Reviews",
+            },
+            {
+              quote:
+                "Excellent barbershop. Asmamaw is a great barber who takes his time, pays close attention to details. One of the best in Silver Spring!",
+              name: "Christopher Harris",
+              source: "Google Reviews",
+            },
+          ].map((review) => (
+            <figure key={review.name} className="card flex flex-col">
+              <div className="text-brand-gold" aria-hidden="true">★★★★★</div>
+              <blockquote className="mt-3 flex-1 text-gray-700 dark:text-gray-200">
+                &ldquo;{review.quote}&rdquo;
+              </blockquote>
+              <figcaption className="mt-4 text-sm font-semibold">
+                {review.name}
+                <span className="ml-2 font-normal text-gray-400">· {review.source}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       {/* ---------------- Closing CTA ---------------- */}
       <section className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6">
         <h2 className="section-title">Ready for a fresh look?</h2>
         <p className="mx-auto mt-3 max-w-md text-gray-600 dark:text-gray-300">
-          Pick your service, choose your barber, and lock in a time that works
+          Pick your service, choose your stylist, and lock in a time that works
           for you.
         </p>
         <div className="mt-8">

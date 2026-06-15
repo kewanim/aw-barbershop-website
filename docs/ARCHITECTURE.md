@@ -1,6 +1,6 @@
 # Architecture
 
-How the pieces of the AW Barbershop project fit together.
+How the pieces of the AW Beauty Salon project fit together.
 
 ## High-level overview
 

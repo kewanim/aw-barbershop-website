@@ -5,9 +5,9 @@ import Footer from "@/components/Footer";
 
 // Page metadata used by Next.js for the <head> tag and SEO.
 export const metadata = {
-  title: "AW Barbershop — Sharp Cuts, Classic Service",
+  title: "AW Beauty Salon — Hair & Barber Studio in Silver Spring, MD",
   description:
-    "Book your next haircut, fade, beard trim, or hot-towel shave at AW Barbershop. Master barbers, modern style, easy online booking.",
+    "Where hair dreams become reality for both men and women. Men's cuts, fades, beard trims, traditional shaves, women's styling, updos, braids, and color in Silver Spring, MD. Easy online booking.",
 };
 
 // The root layout wraps every page. It provides the theme context and the

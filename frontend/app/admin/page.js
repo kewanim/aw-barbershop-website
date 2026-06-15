@@ -176,7 +176,7 @@ export default function AdminPage() {
       {/* ---------------- Barbers + Services summary ---------------- */}
       <div className="mt-10 grid gap-8 lg:grid-cols-2">
         <section>
-          <h2 className="mb-4 text-xl font-bold">Barbers ({barbers.length})</h2>
+          <h2 className="mb-4 text-xl font-bold">Team ({barbers.length})</h2>
           <ul className="space-y-3">
             {barbers.map((b) => (
               <li key={b.id} className="card flex items-center gap-4 p-4">

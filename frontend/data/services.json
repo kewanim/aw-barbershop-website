@@ -1,65 +1,101 @@
 [
   {
     "id": "svc-001",
-    "name": "Classic Haircut",
-    "description": "A timeless cut tailored to your style, finished with a wash and hot-towel refresh.",
+    "name": "Men's Haircut",
+    "description": "A tailored gentleman's cut — classic, modern, or textured — finished with a wash and clean styling.",
     "price": 30,
     "durationMinutes": 30,
-    "category": "Hair",
+    "category": "Men's Hair",
     "popular": true
   },
   {
     "id": "svc-002",
     "name": "Skin Fade",
-    "description": "Precision fade blended down to the skin for a clean, sharp modern look.",
-    "price": 38,
-    "durationMinutes": 45,
-    "category": "Hair",
+    "description": "Precision fade blended down to the skin for a sharp, modern look.",
+    "price": 35,
+    "durationMinutes": 40,
+    "category": "Men's Hair",
     "popular": true
   },
   {
     "id": "svc-003",
-    "name": "Beard Trim & Shape",
-    "description": "Detailed beard line-up and shaping with hot towel and beard oil finish.",
-    "price": 20,
-    "durationMinutes": 20,
-    "category": "Beard",
-    "popular": false
-  },
-  {
-    "id": "svc-004",
-    "name": "Hot Towel Straight Razor Shave",
-    "description": "Traditional straight razor shave with hot towels, pre-shave oil, and aftershave balm.",
-    "price": 35,
-    "durationMinutes": 40,
-    "category": "Shave",
-    "popular": true
-  },
-  {
-    "id": "svc-005",
-    "name": "Haircut & Beard Combo",
-    "description": "Our most popular package: a full haircut paired with a beard trim and shape.",
-    "price": 45,
-    "durationMinutes": 50,
-    "category": "Combo",
-    "popular": true
-  },
-  {
-    "id": "svc-006",
     "name": "Kids Cut (Under 12)",
     "description": "A patient, friendly cut for the little ones, styled just how they like it.",
     "price": 22,
     "durationMinutes": 25,
-    "category": "Hair",
+    "category": "Men's Hair",
     "popular": false
   },
   {
-    "id": "svc-007",
-    "name": "Hair Design / Line Work",
-    "description": "Custom freehand designs and razor line work to make your cut one of a kind.",
-    "price": 15,
+    "id": "svc-004",
+    "name": "Beard Trim & Shape",
+    "description": "Detailed beard line-up and shaping with hot towel and beard oil finish.",
+    "price": 20,
     "durationMinutes": 20,
-    "category": "Design",
+    "category": "Beard & Shave",
+    "popular": false
+  },
+  {
+    "id": "svc-005",
+    "name": "Hot Towel Traditional Shave",
+    "description": "A smooth, traditional straight-razor shave with hot towels and aftershave balm.",
+    "price": 35,
+    "durationMinutes": 40,
+    "category": "Beard & Shave",
+    "popular": true
+  },
+  {
+    "id": "svc-006",
+    "name": "Haircut & Beard Combo",
+    "description": "A full men's haircut paired with a beard trim and shape.",
+    "price": 45,
+    "durationMinutes": 50,
+    "category": "Beard & Shave",
+    "popular": true
+  },
+  {
+    "id": "svc-007",
+    "name": "Women's Cut & Style",
+    "description": "A personalized women's cut with a wash, blow-dry, and finish — from chic bobs to long layers.",
+    "price": 55,
+    "durationMinutes": 60,
+    "category": "Women's Hair",
+    "popular": true
+  },
+  {
+    "id": "svc-008",
+    "name": "Blowout & Styling",
+    "description": "A polished blow-dry and style — glamorous waves, sleek and straight, or soft curls.",
+    "price": 45,
+    "durationMinutes": 45,
+    "category": "Women's Hair",
+    "popular": false
+  },
+  {
+    "id": "svc-009",
+    "name": "Updo / Special Occasion",
+    "description": "Elegant updos and event styling for weddings, parties, and special days.",
+    "price": 70,
+    "durationMinutes": 60,
+    "category": "Women's Hair",
+    "popular": false
+  },
+  {
+    "id": "svc-010",
+    "name": "Braids",
+    "description": "Playful and protective braided styles, tailored to your hair and look.",
+    "price": 65,
+    "durationMinutes": 90,
+    "category": "Women's Hair",
+    "popular": false
+  },
+  {
+    "id": "svc-011",
+    "name": "Color / Highlights",
+    "description": "Single-process color, highlights, or balayage using premium products. Consultation included.",
+    "price": 90,
+    "durationMinutes": 120,
+    "category": "Women's Hair",
     "popular": false
   }
 ]

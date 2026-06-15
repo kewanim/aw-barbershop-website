@@ -1,9 +1,9 @@
-# ✂️ AW Barbershop Website
+# ✂️ AW Beauty Salon Website
 
-A complete, production-ready barbershop website built as a single **Next.js +
-Tailwind CSS** app — UI **and** API routes together — with a **Firebase**-ready
-data layer. It ships with realistic sample data so everything works the moment
-you run it.
+A complete, production-ready website for **AW Beauty Salon** — a unisex hair &
+barber studio in Silver Spring, MD — built as a single **Next.js + Tailwind CSS**
+app (UI **and** API routes together) with a **Firebase**-ready data layer. It
+ships with realistic sample data so everything works the moment you run it.
 
 ![Tech](https://img.shields.io/badge/Next.js-16-black) ![Tech](https://img.shields.io/badge/React-19-blue) ![Tech](https://img.shields.io/badge/Tailwind-3-38bdf8) ![Tech](https://img.shields.io/badge/API-routes-orange)
 
@@ -84,4 +84,4 @@ barbershop-website/
 
 ## 📝 License
 
-Proprietary — built for the AW Barbershop client. All rights reserved.
+Proprietary — built for the AW Beauty Salon client. All rights reserved.

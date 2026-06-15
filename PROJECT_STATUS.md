@@ -1,4 +1,4 @@
-# 📊 Project Status — AW Barbershop Website
+# 📊 Project Status — AW Beauty Salon Website
 
 _Last updated: 2026-06-15_
 
@@ -6,11 +6,12 @@ _Last updated: 2026-06-15_
 
 | Field    | Value                                         |
 | -------- | --------------------------------------------- |
-| Client   | AW Barbershop                                 |
+| Client   | AW Beauty Salon (Silver Spring, MD) — unisex hair & barber studio |
 | Budget   | _TBD — confirm with client_                   |
 | Deadline | _TBD — confirm with client_                   |
-| Phase    | **Phase 1 — MVP scaffold complete**           |
+| Phase    | **Phase 2 — feature build + real-content rebrand** |
 | Stack    | Next.js (UI + API) · Tailwind · Firebase (planned) |
+| Live site (current) | https://www.awbeautysalon.com — source of real content |
 
 ---
 
@@ -120,12 +121,28 @@ Later / supporting:
 
 ---
 
+## 🎨 Content & Branding (rebranded to AW Beauty Salon)
+
+Real content pulled from the live site (awbeautysalon.com) and applied:
+- ✅ Name, tagline, about copy, address, phone, Instagram/Facebook links
+- ✅ Real team: **Asmamaw** (Barber), **Joseph** (Hair Stylist)
+- ✅ Two real Google testimonials (Monica B., Christopher Harris)
+- ✅ Unisex service menu (men's hair, beard & shave, women's hair)
+
+**Still placeholder / needed from client:**
+- ⛳ **Service prices** — not on live site; current numbers are placeholders.
+- ⛳ **Business hours** — not listed; footer says "please call to confirm".
+- ⛳ **Real staff photos** — using stock placeholders (`photoDescription` flags this).
+- ⛳ **Email address** — live site obfuscates it; need the real one.
+- ⛳ Confirm full team roster (site only named two staff).
+
 ## 🗒 Notes for Next Session
 
 - Confirm **budget and deadline** with the client and fill them in above.
-- Get **real barber photos** + accurate service prices from the client.
+- Collect the placeholders above (prices, hours, photos, email).
+- Remove the demo-login hint on `/login` and set real staff passwords + `AUTH_SECRET` before launch.
 - ✅ Decided: single Next.js app (UI + API routes), Firestore later. Express retired.
 - ✅ GitHub repo live: https://github.com/kewanim/aw-barbershop-website
-- **Next:** Feature 2 — admin login + protected `/admin` route.
+- **Next feature:** Feature 3 — booking management (confirm/cancel/reschedule).
 - Bookings persist to a local file in dev; swap `lib/store.js` to Firestore
   before any production deploy (Vercel FS is ephemeral).

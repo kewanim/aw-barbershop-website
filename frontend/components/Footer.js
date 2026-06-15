@@ -12,12 +12,20 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-2 text-lg font-bold">
             <span className="text-brand-gold">✂</span>
-            <span>AW Barbershop</span>
+            <span>AW Beauty Salon</span>
           </div>
           <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-            Sharp cuts and classic service. Walk in for a trim, or book online in
-            seconds.
+            Where hair dreams become reality for both men and women. Walk in, or
+            book online in seconds.
           </p>
+          <div className="mt-4 flex gap-4 text-sm">
+            <a href="https://instagram.com/aw_beauty_salon" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-brand-gold dark:text-gray-300">
+              Instagram
+            </a>
+            <a href="https://www.facebook.com/share/WoEkSNfq1nLyyyM9/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-brand-gold dark:text-gray-300">
+              Facebook
+            </a>
+          </div>
         </div>
 
         {/* Quick links */}
@@ -34,16 +42,18 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold">Visit Us</h3>
           <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-            <li>123 Main Street, Downtown</li>
-            <li>(555) 123-4567</li>
-            <li>Mon–Sat: 9:00 AM – 7:00 PM</li>
-            <li>Sun: Closed</li>
+            <li>908 Thayer Ave, Silver Spring, MD</li>
+            <li>
+              <a href="tel:+13015888882" className="hover:text-brand-gold">(301) 588-8882</a>
+            </li>
+            {/* TODO: confirm real business hours with the client */}
+            <li className="text-gray-400">Hours: please call to confirm</li>
           </ul>
         </div>
       </div>
 
       <div className="border-t border-gray-200 py-4 text-center text-sm text-gray-500 dark:border-gray-700">
-        © {year} AW Barbershop. All rights reserved.
+        © {year} AW Beauty Salon · Silver Spring, MD. All rights reserved.
       </div>
     </footer>
   );
