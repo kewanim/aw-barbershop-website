@@ -112,10 +112,45 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ### Protected endpoints
 
-These require a valid session cookie and return **401** otherwise:
+These require a valid **staff** session cookie and return **401** otherwise:
 
 - `GET /api/appointments` (lists customer details)
 - `GET|PUT|DELETE /api/appointments/:id`
+
+---
+
+## Customer accounts — `/api/customer`
+
+Customers can optionally create an account to save their details and view their
+booking + payment history. Customers use a **separate** session cookie from
+staff (`aw_customer`), so the two never mix.
+
+| Method | Path                     | Description                                  |
+| ------ | ------------------------ | -------------------------------------------- |
+| POST   | `/api/customer/register` | Create an account (`name`, `email`, `password`) and sign in. |
+| POST   | `/api/customer/login`    | Log in (`email`, `password`).                |
+| POST   | `/api/customer/logout`   | Clear the customer cookie.                    |
+| GET    | `/api/customer/me`       | The signed-in customer, or 401.               |
+| GET    | `/api/customer/bookings` | The signed-in customer's history (their bookings). |
+
+**Demo customer:** `monica@example.com / password123`.
+
+When a customer is signed in, `POST /api/appointments` automatically links the
+new booking to their account (`customerId`). Guests can still book with no account.
+
+### Payment fields on a booking
+
+Each booking carries payment tracking (charge-at-salon model):
+
+| Field           | Meaning                                   |
+| --------------- | ----------------------------------------- |
+| `paymentStatus` | `unpaid` \| `paid`                        |
+| `amountPaid`    | amount recorded as paid                   |
+| `paymentMethod` | e.g. `in-person`, `card`                  |
+| `paidAt`        | ISO timestamp when marked paid            |
+
+Staff record a payment via `PUT /api/appointments/:id` (the admin "Mark paid"
+button). **Phase 4b** will replace this with a real Stripe charge + saved cards.
 
 The booking **create** endpoint (`POST /api/appointments`) and all reference
 data (`/api/services`, `/api/barbers`, `/api/availability`) stay **public** so

@@ -3,7 +3,7 @@
 //   POST — create a booking (PUBLIC: customers book without an account)
 import { NextResponse } from "next/server";
 import { listBookings, createBooking } from "@/lib/store";
-import { getCurrentStaff } from "@/lib/auth";
+import { getCurrentStaff, getCurrentCustomer } from "@/lib/auth";
 
 export async function GET(request) {
   // Listing all bookings is staff-only (it exposes customer contact details).
@@ -26,7 +26,13 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const result = await createBooking(body);
+  // If a customer is signed in, link the booking to their account so it shows
+  // up in their history. Guests book with no linked account.
+  const customer = await getCurrentCustomer();
+  const result = await createBooking({
+    ...body,
+    customerId: customer ? customer.id : null,
+  });
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status || 400 });
   }

@@ -66,6 +66,17 @@ export default function AdminPage() {
     loadBookings();
   }
 
+  // Record a payment (charge-at-salon model): marks the booking paid for its
+  // full price. In Phase 4b this is where a real Stripe charge would happen.
+  async function markPaid(booking) {
+    await patchBooking(booking.id, {
+      paymentStatus: "paid",
+      amountPaid: booking.price,
+      paymentMethod: "in-person",
+      paidAt: new Date().toISOString(),
+    });
+  }
+
   // Permanently delete a booking (used for cancelled rows).
   async function removeBooking(id) {
     if (!window.confirm("Delete this booking permanently?")) return;
@@ -163,13 +174,14 @@ export default function AdminPage() {
                 <th className="px-4 py-3 font-semibold">Time</th>
                 <th className="px-4 py-3 font-semibold">Price</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Payment</th>
                 <th className="px-4 py-3 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {loading && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
                     Loading bookings…
                   </td>
                 </tr>
@@ -187,10 +199,24 @@ export default function AdminPage() {
                   <td className="px-4 py-3 font-medium">${b.price}</td>
                   <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
                   <td className="px-4 py-3">
+                    {b.paymentStatus === "paid" ? (
+                      <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                        Paid ${b.amountPaid}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">Unpaid</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {b.status === "pending" && (
                         <button onClick={() => patchBooking(b.id, { status: "confirmed" })} className={actionBtn("green")}>
                           Confirm
+                        </button>
+                      )}
+                      {b.status !== "cancelled" && b.paymentStatus !== "paid" && (
+                        <button onClick={() => markPaid(b)} className={actionBtn("green")}>
+                          Mark paid
                         </button>
                       )}
                       {b.status !== "cancelled" && (
@@ -214,7 +240,7 @@ export default function AdminPage() {
               ))}
               {!loading && visibleBookings.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
                     No {filter} bookings.
                   </td>
                 </tr>

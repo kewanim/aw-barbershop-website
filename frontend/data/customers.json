@@ -1,0 +1,9 @@
+[
+  {
+    "id": "cust-1",
+    "name": "Monica Bell",
+    "email": "monica@example.com",
+    "password": "password123",
+    "stripeCustomerId": null
+  }
+]

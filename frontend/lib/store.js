@@ -18,12 +18,14 @@ import servicesSeed from "@/data/services.json";
 import barbersSeed from "@/data/barbers.json";
 import bookingsSeed from "@/data/bookings.json";
 import staffSeed from "@/data/staff.json";
+import customersSeed from "@/data/customers.json";
 import { hashPassword, verifyPassword } from "@/lib/auth";
 
 // Where runtime data lives. Git-ignored; seeded on first use.
 const DATA_DIR = path.join(process.cwd(), ".data");
 const BOOKINGS_FILE = path.join(DATA_DIR, "bookings.json");
 const STAFF_FILE = path.join(DATA_DIR, "staff.json");
+const CUSTOMERS_FILE = path.join(DATA_DIR, "customers.json");
 
 // Shop opening hours, in minutes since midnight (09:00–18:00) and slot size.
 const OPEN_MIN = 9 * 60; // 09:00
@@ -169,6 +171,8 @@ export async function createBooking(input) {
 
   const booking = {
     id: newId(),
+    // Link to a customer account when one is signed in (null for guests).
+    customerId: input.customerId || null,
     customerName: input.customerName,
     customerEmail: input.customerEmail,
     customerPhone: input.customerPhone,
@@ -181,6 +185,11 @@ export async function createBooking(input) {
     price: service.price,
     status: "pending",
     notes: input.notes || "",
+    // Payment is recorded later (charge-at-salon model). Tracks amount + method.
+    paymentStatus: "unpaid",
+    amountPaid: 0,
+    paymentMethod: null,
+    paidAt: null,
   };
 
   const bookings = await readBookings();
@@ -274,4 +283,84 @@ export async function verifyStaffCredentials(username, password) {
   if (!verifyPassword(password, found.passwordHash)) return null;
   const { passwordHash, ...safe } = found;
   return safe;
+}
+
+/* ------------------------------ customers -------------------------------- */
+// Customer accounts let people save details, view their booking/payment
+// history, and (in Phase 4b) save a card on file. Passwords are scrypt-hashed,
+// same as staff. The `stripeCustomerId` is populated later when Stripe is wired.
+
+async function readCustomers() {
+  try {
+    const raw = await fs.readFile(CUSTOMERS_FILE, "utf8");
+    return JSON.parse(raw);
+  } catch {
+    const seeded = customersSeed.map((c) => ({
+      id: c.id,
+      name: c.name,
+      email: c.email,
+      passwordHash: hashPassword(c.password),
+      stripeCustomerId: c.stripeCustomerId || null,
+    }));
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(CUSTOMERS_FILE, JSON.stringify(seeded, null, 2));
+    return seeded;
+  }
+}
+
+async function writeCustomers(list) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(CUSTOMERS_FILE, JSON.stringify(list, null, 2));
+}
+
+// Strip the password hash before returning a customer to callers.
+function safeCustomer(c) {
+  const { passwordHash, ...rest } = c;
+  return rest;
+}
+
+// Register a new customer. Returns { data } or { error, status }.
+export async function createCustomer({ name, email, password }) {
+  if (!name || !email || !password) {
+    return { error: "Name, email and password are required", status: 400 };
+  }
+  const customers = await readCustomers();
+  if (customers.some((c) => c.email.toLowerCase() === String(email).toLowerCase())) {
+    return { error: "An account with that email already exists", status: 409 };
+  }
+  const customer = {
+    id: `cust-${Date.now().toString(36)}`,
+    name,
+    email,
+    passwordHash: hashPassword(password),
+    stripeCustomerId: null,
+  };
+  customers.push(customer);
+  await writeCustomers(customers);
+  return { data: safeCustomer(customer) };
+}
+
+// Verify customer login. Returns the safe customer or null.
+export async function verifyCustomerCredentials(email, password) {
+  const customers = await readCustomers();
+  const found = customers.find(
+    (c) => c.email.toLowerCase() === String(email || "").toLowerCase()
+  );
+  if (!found) return null;
+  if (!verifyPassword(password, found.passwordHash)) return null;
+  return safeCustomer(found);
+}
+
+export async function getCustomerById(id) {
+  const customers = await readCustomers();
+  const found = customers.find((c) => c.id === id);
+  return found ? safeCustomer(found) : null;
+}
+
+// All bookings belonging to a customer, newest first — their history.
+export async function listBookingsByCustomer(customerId) {
+  const bookings = await readBookings();
+  return bookings
+    .filter((b) => b.customerId === customerId)
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
 }

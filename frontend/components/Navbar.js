@@ -10,6 +10,7 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
   { href: "/booking", label: "Book Now" },
+  { href: "/account", label: "My Account" },
   { href: "/admin", label: "Admin" },
 ];
 

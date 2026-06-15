@@ -78,3 +78,30 @@ export async function getCurrentStaff() {
   const token = store.get(SESSION_COOKIE)?.value;
   return verifySession(token);
 }
+
+/* --------------------------- customer sessions --------------------------- */
+// Customers use a separate cookie from staff, so the two never mix.
+
+export const CUSTOMER_COOKIE = "aw_customer";
+
+// Build a signed session token for a customer.
+export function createCustomerSession(customer) {
+  const payload = {
+    id: customer.id,
+    name: customer.name,
+    email: customer.email,
+    kind: "customer",
+    exp: Date.now() + SESSION_MAX_AGE * 1000,
+  };
+  const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return `${data}.${sign(data)}`;
+}
+
+// Read the current customer from the customer cookie. Returns the payload or
+// null. Verifies the token is actually a customer token (kind === "customer").
+export async function getCurrentCustomer() {
+  const store = await cookies();
+  const token = store.get(CUSTOMER_COOKIE)?.value;
+  const payload = verifySession(token);
+  return payload && payload.kind === "customer" ? payload : null;
+}

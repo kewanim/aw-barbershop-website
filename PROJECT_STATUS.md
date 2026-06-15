@@ -67,11 +67,23 @@ _Last updated: 2026-06-15_
 
 ---
 
+### ✅ Feature 4a — Customer accounts + payment history (done)
+- **Customer accounts** (guest-friendly): register/login/logout with scrypt-hashed
+  passwords and a separate session cookie from staff (`aw_customer`).
+- **"My Account" page** (`/account`): combined login/register when logged out;
+  visit & payment history when logged in.
+- **Bookings link to the signed-in customer** automatically; guests still book.
+- **Payment tracking** on every booking (`paymentStatus`, `amountPaid`,
+  `paymentMethod`, `paidAt`) — charge-at-salon model.
+- **Admin "Mark paid"** action + Payment column records the payment.
+- Demo customer: `monica@example.com / password123` (seeded with history).
+
 ## 🚧 In Progress
 
-- **Feature 4 — Payments / deposits** (next up): take a deposit at booking via
-  Stripe. **Needs client input** — a Stripe account + test API keys — and
-  involves money, so we'll confirm before wiring it up.
+- **Feature 4b — Stripe saved cards** (next up): save a card on file per
+  customer (Stripe Customer + SetupIntent) and charge through Stripe. **Needs
+  Stripe TEST API keys** to verify end-to-end; will be built behind env vars so
+  the app runs fine until keys are added.
 
 ---
 
@@ -80,7 +92,7 @@ _Last updated: 2026-06-15_
 1. ✅ Real booking + availability — **done**
 2. ✅ Admin login & protected dashboard — **done**
 3. ✅ Booking management (confirm/cancel/reschedule from admin) — **done**
-4. ⏭ Payments / deposits at booking (Stripe) — **next** (needs Stripe keys)
+4. Payments — **4a done** (accounts + history); **4b next** (Stripe saved cards, needs keys)
 
 Later / supporting:
 - Wire up Firebase Firestore + Auth (see `database/SETUP.md`) — swap the local
