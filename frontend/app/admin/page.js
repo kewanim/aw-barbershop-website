@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import barbers from "@/data/barbers.json";
 import services from "@/data/services.json";
 
@@ -8,10 +9,27 @@ import services from "@/data/services.json";
 // bookings, fetched live from the API (/api/appointments) — so bookings made on
 // the booking page show up here.
 export default function AdminPage() {
+  const router = useRouter();
   const [filter, setFilter] = useState("all");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [staff, setStaff] = useState(null); // the signed-in staff member
+
+  // Load the current staff member's name to greet them in the header.
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => json && setStaff(json.data))
+      .catch(() => {});
+  }, []);
+
+  // Log out: clear the session cookie, then return to the login page.
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/login");
+    router.refresh();
+  }
 
   // Load all bookings from the API.
   const loadBookings = useCallback(async () => {
@@ -58,12 +76,17 @@ export default function AdminPage() {
         <div>
           <h1 className="section-title">Admin Dashboard</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-300">
-            Overview of appointments, barbers, and services.
+            {staff ? `Signed in as ${staff.name} (${staff.role})` : "Overview of appointments, barbers, and services."}
           </p>
         </div>
-        <button onClick={loadBookings} className="btn-outline px-4 py-2 text-sm">
-          {loading ? "Refreshing…" : "↻ Refresh"}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={loadBookings} className="btn-outline px-4 py-2 text-sm">
+            {loading ? "Refreshing…" : "↻ Refresh"}
+          </button>
+          <button onClick={handleLogout} className="btn-primary px-4 py-2 text-sm">
+            Log out
+          </button>
+        </div>
       </div>
 
       {error && (

@@ -82,7 +82,35 @@ service's duration so longer services don't overlap.
 
 ---
 
-## Auth — _coming in Feature 2_
+## Auth — `/api/auth`
 
-Admin authentication (protecting `/admin`) is the next feature. It will add
-login endpoints under `/api/auth` and route protection for the dashboard.
+Staff authentication for the admin dashboard. Passwords are hashed with scrypt;
+sessions are signed (HMAC) and stored in an httpOnly cookie. Set `AUTH_SECRET`
+in production to sign cookies (a dev fallback is used locally).
+
+| Method | Path               | Description                                       |
+| ------ | ------------------ | ------------------------------------------------- |
+| POST   | `/api/auth/login`  | Log in with `{ username, password }`; sets cookie. |
+| POST   | `/api/auth/logout` | Clears the session cookie.                         |
+| GET    | `/api/auth/me`     | Returns the signed-in staff member, or 401.        |
+
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{ "username": "admin", "password": "admin123" }' -c cookies.txt
+```
+
+**Demo staff logins** (seeded, change before production):
+`admin / admin123` (owner) · `marcus / marcus123` (manager).
+
+### Protected endpoints
+
+These require a valid session cookie and return **401** otherwise:
+
+- `GET /api/appointments` (lists customer details)
+- `GET|PUT|DELETE /api/appointments/:id`
+
+The booking **create** endpoint (`POST /api/appointments`) and all reference
+data (`/api/services`, `/api/barbers`, `/api/availability`) stay **public** so
+customers can book without an account. The `/admin` page itself is gated
+server-side and redirects to `/login` when not authenticated.

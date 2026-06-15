@@ -1,10 +1,17 @@
 // /api/appointments
-//   GET  — list bookings (optional ?status=confirmed|pending|cancelled)
-//   POST — create a booking (validates input + re-checks availability)
+//   GET  — list bookings (admin only; optional ?status=confirmed|pending|cancelled)
+//   POST — create a booking (PUBLIC: customers book without an account)
 import { NextResponse } from "next/server";
 import { listBookings, createBooking } from "@/lib/store";
+import { getCurrentStaff } from "@/lib/auth";
 
 export async function GET(request) {
+  // Listing all bookings is staff-only (it exposes customer contact details).
+  const staff = await getCurrentStaff();
+  if (!staff) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status") || undefined;
   const data = await listBookings({ status });

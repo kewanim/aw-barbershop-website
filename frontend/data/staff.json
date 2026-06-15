@@ -1,0 +1,16 @@
+[
+  {
+    "id": "staff-1",
+    "username": "admin",
+    "name": "Shop Owner",
+    "role": "owner",
+    "password": "admin123"
+  },
+  {
+    "id": "staff-2",
+    "username": "marcus",
+    "name": "Marcus Reed",
+    "role": "manager",
+    "password": "marcus123"
+  }
+]

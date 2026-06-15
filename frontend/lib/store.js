@@ -17,10 +17,13 @@ import { promises as fs } from "fs";
 import servicesSeed from "@/data/services.json";
 import barbersSeed from "@/data/barbers.json";
 import bookingsSeed from "@/data/bookings.json";
+import staffSeed from "@/data/staff.json";
+import { hashPassword, verifyPassword } from "@/lib/auth";
 
-// Where runtime booking data lives. Git-ignored; seeded on first use.
+// Where runtime data lives. Git-ignored; seeded on first use.
 const DATA_DIR = path.join(process.cwd(), ".data");
 const BOOKINGS_FILE = path.join(DATA_DIR, "bookings.json");
+const STAFF_FILE = path.join(DATA_DIR, "staff.json");
 
 // Shop opening hours, in minutes since midnight (09:00–18:00) and slot size.
 const OPEN_MIN = 9 * 60; // 09:00
@@ -203,4 +206,45 @@ export async function deleteBooking(id) {
   const [removed] = bookings.splice(index, 1);
   await writeBookings(bookings);
   return { data: removed };
+}
+
+/* -------------------------------- staff ---------------------------------- */
+// Staff accounts for the admin dashboard. Seeded from data/staff.json, but the
+// plain seed passwords are hashed (scrypt) before they're written to disk, so
+// the runtime store (.data/staff.json) never contains plain-text passwords.
+
+async function readStaff() {
+  try {
+    const raw = await fs.readFile(STAFF_FILE, "utf8");
+    return JSON.parse(raw);
+  } catch {
+    const seeded = staffSeed.map((s) => ({
+      id: s.id,
+      username: s.username,
+      name: s.name,
+      role: s.role,
+      passwordHash: hashPassword(s.password),
+    }));
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(STAFF_FILE, JSON.stringify(seeded, null, 2));
+    return seeded;
+  }
+}
+
+// List staff without exposing password hashes.
+export async function listStaff() {
+  const staff = await readStaff();
+  return staff.map(({ passwordHash, ...rest }) => rest);
+}
+
+// Verify a username/password. Returns the safe staff object or null.
+export async function verifyStaffCredentials(username, password) {
+  const staff = await readStaff();
+  const found = staff.find(
+    (s) => s.username.toLowerCase() === String(username || "").toLowerCase()
+  );
+  if (!found) return null;
+  if (!verifyPassword(password, found.passwordHash)) return null;
+  const { passwordHash, ...safe } = found;
+  return safe;
 }

@@ -42,20 +42,32 @@ _Last updated: 2026-06-15_
   server-side re-check that returns 409 if a slot was just taken).
 - **Admin dashboard** now reads live bookings from the API with a refresh button.
 
+### ✅ Feature 2 — Admin login (done)
+- **Multiple staff accounts** with scrypt-hashed passwords (`frontend/data/staff.json`
+  seed → hashed into `.data/staff.json` at runtime; no plain-text passwords stored).
+- **Session auth** via signed (HMAC) httpOnly cookie — no external service.
+  Helpers in `frontend/lib/auth.js`; `AUTH_SECRET` env var for production.
+- **`/api/auth/login`, `/logout`, `/me`** endpoints.
+- **`/admin` is gated server-side** (`app/admin/layout.js`) and redirects to
+  `/login` when not authenticated; dashboard shows the signed-in user + log out.
+- **Booking-detail endpoints protected** (401 without a session); public
+  booking creation stays open so customers don't need an account.
+- Demo logins: `admin / admin123`, `marcus / marcus123` (change before launch).
+
 ---
 
 ## 🚧 In Progress
 
-- **Feature 2 — Admin login** (next up): protect the `/admin` dashboard behind
-  staff authentication.
+- **Feature 3 — Booking management** (next up): confirm / cancel / reschedule
+  appointments directly from the admin dashboard (wired to the PUT/DELETE API).
 
 ---
 
 ## ⏭ What's Coming Next (agreed order)
 
 1. ✅ Real booking + availability — **done**
-2. ⏭ Admin login & protected dashboard — **next**
-3. ⏭ Booking management (confirm/cancel/reschedule from admin)
+2. ✅ Admin login & protected dashboard — **done**
+3. ⏭ Booking management (confirm/cancel/reschedule from admin) — **next**
 4. ⏭ Payments / deposits at booking (Stripe)
 
 Later / supporting:
