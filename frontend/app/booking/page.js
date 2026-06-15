@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import services from "@/data/services.json";
 import barbers from "@/data/barbers.json";
+import PageHeader from "@/components/PageHeader";
 
 // The form is wrapped in <Suspense> because it uses useSearchParams(),
 // which Next.js requires to be inside a Suspense boundary.
@@ -188,13 +189,12 @@ function BookingForm() {
 
   // ---- Booking form ----
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
-      <div className="text-center">
-        <h1 className="section-title">Book an Appointment</h1>
-        <p className="mt-3 text-gray-600 dark:text-gray-300">
-          Fill in your details and we&apos;ll lock in your spot.
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        title="Book an Appointment"
+        subtitle="Fill in your details and we'll lock in your spot."
+      />
+      <div className="mx-auto max-w-2xl px-4 pb-14 pt-8 sm:px-6">
 
       {/* Server-side error banner (e.g. the slot was just taken) */}
       {serverError && (
@@ -320,6 +320,7 @@ function BookingForm() {
           {submitting ? "Booking…" : "Confirm Booking"}
         </button>
       </form>
+      </div>
     </div>
   );
 }
