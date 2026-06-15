@@ -25,6 +25,10 @@ dist/
 # Firebase config built from the template (contains keys)
 database/firebase-config.js
 
+# Local runtime data store (seeded from sample data at runtime)
+.data/
+frontend/.data/
+
 # ============================================================================
 # Logs & debug
 # ============================================================================

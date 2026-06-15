@@ -11,13 +11,15 @@ The tools used in this project and why.
 | **Tailwind CSS** | 3.x     | Utility-first styling — fast, consistent, responsive.      |
 | **PostCSS / Autoprefixer** | — | Build pipeline for Tailwind + vendor prefixes.   |
 
-## Backend
+## Backend / API
 
-| Tool        | Version | Why                                              |
-| ----------- | ------- | ------------------------------------------------ |
-| **Node.js** | 18+     | JavaScript runtime.                              |
-| **Express** | 4.x     | Minimal, well-known web framework for the REST API. |
-| **CORS**    | 2.x     | Lets the frontend call the API from another origin. |
+| Tool                     | Why                                                       |
+| ------------------------ | --------------------------------------------------------- |
+| **Next.js API routes**   | The API lives in the same app as the UI (`app/api/`) — same-origin, no CORS, one thing to deploy. |
+| **Local file store**     | `frontend/lib/store.js` persists data to JSON on disk for dev; a Firestore adapter drops in later. |
+
+> The project originally included a separate Express server. It was retired in
+> favor of consolidated Next.js API routes (simpler hosting and one codebase).
 
 ## Database
 
@@ -34,10 +36,9 @@ The tools used in this project and why.
 | Tool        | Role                                  |
 | ----------- | ------------------------------------- |
 | **Git / GitHub** | Version control & collaboration. |
-| **Vercel**  | Recommended hosting for the Next.js frontend. |
-| **Render / Railway / Fly.io** | Options for hosting the Express backend. |
+| **Vercel**  | One-step hosting for the whole Next.js app (UI + API). |
 
 ## Language
 
-- **JavaScript (ES2020+)** throughout, for both the React frontend and the
-  Express backend, to keep one language across the stack.
+- **JavaScript (ES2020+)** throughout — React components and Next.js API route
+  handlers share one language across the stack.

@@ -1,10 +1,11 @@
 # ✂️ AW Barbershop Website
 
-A complete, production-ready barbershop website: a modern **Next.js + Tailwind
-CSS** frontend, an **Express** REST API, and a **Firebase**-ready data layer.
-It ships with realistic sample data so everything works the moment you run it.
+A complete, production-ready barbershop website built as a single **Next.js +
+Tailwind CSS** app — UI **and** API routes together — with a **Firebase**-ready
+data layer. It ships with realistic sample data so everything works the moment
+you run it.
 
-![Tech](https://img.shields.io/badge/Next.js-16-black) ![Tech](https://img.shields.io/badge/React-19-blue) ![Tech](https://img.shields.io/badge/Tailwind-3-38bdf8) ![Tech](https://img.shields.io/badge/Express-4-green)
+![Tech](https://img.shields.io/badge/Next.js-16-black) ![Tech](https://img.shields.io/badge/React-19-blue) ![Tech](https://img.shields.io/badge/Tailwind-3-38bdf8) ![Tech](https://img.shields.io/badge/API-routes-orange)
 
 ---
 
@@ -18,8 +19,9 @@ It ships with realistic sample data so everything works the moment you run it.
 - **Admin dashboard** showing real stats, a filterable bookings table, and the
   barber & service roster.
 - **100% mobile responsive** and accessible.
-- **Express API** with full CRUD for appointments, barbers, and services, plus
-  basic auth.
+- **Real booking + availability** — Next.js API routes serve live open time
+  slots per barber, persist bookings, and prevent double-booking.
+- **Live admin dashboard** reading bookings from the API.
 
 ---
 
@@ -31,16 +33,9 @@ npm install
 npm run dev
 ```
 
-Then open **<http://localhost:3000>**. That's it — the site runs on bundled
-sample data with no backend or database required.
-
-### Optional: run the API
-
-```bash
-cd barbershop-website/backend
-npm install
-npm start          # http://localhost:4000
-```
+Then open **<http://localhost:3000>**. That's it — UI, API routes, and the local
+data store all run from this one app. No separate server or external database
+required; bookings persist to a local file (`.data/`) as you create them.
 
 ---
 
@@ -48,10 +43,10 @@ npm start          # http://localhost:4000
 
 | Layer     | Tools                                      |
 | --------- | ------------------------------------------ |
-| Frontend  | Next.js 16 (App Router), React 19, Tailwind CSS 3 |
-| Backend   | Node.js, Express 4, CORS                    |
-| Database  | Firebase Firestore (template provided)      |
-| Hosting   | Vercel (frontend), Render/Railway (backend) |
+| UI        | Next.js 16 (App Router), React 19, Tailwind CSS 3 |
+| API       | Next.js route handlers (`app/api/`)         |
+| Data      | Local JSON file store (`lib/store.js`), Firebase Firestore-ready |
+| Hosting   | Vercel (single app)                         |
 
 Full details in [`docs/TECH_STACK.md`](docs/TECH_STACK.md).
 
@@ -61,13 +56,12 @@ Full details in [`docs/TECH_STACK.md`](docs/TECH_STACK.md).
 
 ```
 barbershop-website/
-├── frontend/            # Next.js app (the website users see)
-│   ├── app/             # Pages: home, services, booking, admin
+├── frontend/            # The Next.js app (UI + API)
+│   ├── app/             # Pages (home, services, booking, admin)
+│   │   └── api/         # API routes: appointments, availability, barbers, services
 │   ├── components/      # Navbar, Footer, ThemeProvider, ThemeToggle
-│   └── data/            # Sample JSON the UI reads
-├── backend/             # Express REST API
-│   ├── api/             # appointments, barbers, services, auth routes
-│   └── data/            # Sample JSON the API serves
+│   ├── lib/             # store.js — data layer + booking/availability logic
+│   └── data/            # Seed JSON (services, barbers, bookings)
 ├── database/            # Firebase config template, schema, seed data
 ├── docs/                # Architecture, API reference, setup, tech stack
 ├── config/              # Shared .env template

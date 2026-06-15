@@ -1,15 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import bookings from "@/data/bookings.json";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import barbers from "@/data/barbers.json";
 import services from "@/data/services.json";
 
 // Basic admin dashboard. Shows summary stats and a filterable table of all
-// bookings using the sample data. In production these numbers would come from
-// the backend API (backend/api/appointments.js) instead of the JSON file.
+// bookings, fetched live from the API (/api/appointments) — so bookings made on
+// the booking page show up here.
 export default function AdminPage() {
   const [filter, setFilter] = useState("all");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Load all bookings from the API.
+  const loadBookings = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/appointments");
+      const json = await res.json();
+      setBookings(json.data || []);
+    } catch {
+      setError("Could not load bookings. Is the server running?");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadBookings();
+  }, [loadBookings]);
 
   // Derived summary statistics for the stat cards.
   const stats = useMemo(() => {
@@ -25,7 +46,7 @@ export default function AdminPage() {
       pending: pending.length,
       revenue,
     };
-  }, []);
+  }, [bookings]);
 
   // Apply the status filter to the bookings table.
   const visibleBookings =
@@ -40,10 +61,16 @@ export default function AdminPage() {
             Overview of appointments, barbers, and services.
           </p>
         </div>
-        <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200">
-          Demo data — read only
-        </span>
+        <button onClick={loadBookings} className="btn-outline px-4 py-2 text-sm">
+          {loading ? "Refreshing…" : "↻ Refresh"}
+        </button>
       </div>
+
+      {error && (
+        <div className="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+          {error}
+        </div>
+      )}
 
       {/* ---------------- Stat cards ---------------- */}
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -90,7 +117,14 @@ export default function AdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {visibleBookings.map((b) => (
+              {loading && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                    Loading bookings…
+                  </td>
+                </tr>
+              )}
+              {!loading && visibleBookings.map((b) => (
                 <tr key={b.id} className="hover:bg-gray-50 dark:hover:bg-brand-slate/50">
                   <td className="px-4 py-3">
                     <div className="font-medium">{b.customerName}</div>
@@ -104,7 +138,7 @@ export default function AdminPage() {
                   <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
                 </tr>
               ))}
-              {visibleBookings.length === 0 && (
+              {!loading && visibleBookings.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                     No {filter} bookings.

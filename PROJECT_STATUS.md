@@ -10,13 +10,13 @@ _Last updated: 2026-06-15_
 | Budget   | _TBD — confirm with client_                   |
 | Deadline | _TBD — confirm with client_                   |
 | Phase    | **Phase 1 — MVP scaffold complete**           |
-| Stack    | Next.js · Tailwind · Express · Firebase (planned) |
+| Stack    | Next.js (UI + API) · Tailwind · Firebase (planned) |
 
 ---
 
 ## ✅ What's Done
 
-- Full folder structure (frontend / backend / database / docs / config).
+- Full folder structure (frontend / database / docs / config).
 - **Frontend (Next.js + Tailwind):**
   - Homepage with hero, featured services, barber team, CTA.
   - Automatic dark/light mode (time-of-day) + manual toggle with persistence.
@@ -24,38 +24,55 @@ _Last updated: 2026-06-15_
   - Working booking form with validation + confirmation screen.
   - Admin dashboard with stats, filterable bookings table, barber/service lists.
   - Responsive navbar (with mobile menu) and footer.
-- **Backend (Express):** CRUD APIs for appointments, barbers, services + basic auth.
-- **Sample data:** 3 barbers, 7 services, 5 bookings (shared across app & API).
+- **Sample data:** 3 barbers, 7 services, 5 bookings.
 - **Database:** Firebase config template, Firestore schema, seed data, setup guide.
 - **Docs:** Architecture, API reference, setup/deploy, tech stack.
 - README, .gitignore, .env templates, Next.js config.
+
+### ✅ Feature 1 — Real booking + availability (done)
+- **Next.js API routes** (`frontend/app/api/…`) now serve services, barbers,
+  availability, and full CRUD for appointments — the standalone Express backend
+  has been retired in favor of one consolidated Next.js app.
+- **Swappable data layer** (`frontend/lib/store.js`) persists bookings to a
+  local JSON file (`.data/bookings.json`, git-ignored). Built so a Firestore
+  adapter can drop in later with no changes to the rest of the app.
+- **Availability engine** computes open time slots per barber/date/service,
+  honoring service duration and shop hours — no double-booking.
+- **Booking form** fetches live open times and saves real bookings (with a
+  server-side re-check that returns 409 if a slot was just taken).
+- **Admin dashboard** now reads live bookings from the API with a refresh button.
 
 ---
 
 ## 🚧 In Progress
 
-- _Nothing actively in progress — awaiting client review of the MVP._
+- **Feature 2 — Admin login** (next up): protect the `/admin` dashboard behind
+  staff authentication.
 
 ---
 
-## ⏭ What's Coming Next
+## ⏭ What's Coming Next (agreed order)
 
-- Connect the frontend to the live Express API (replace direct JSON imports).
-- Wire up Firebase Firestore + Auth (see `database/SETUP.md`).
-- Real admin authentication + protected dashboard routes.
-- Booking availability logic (prevent double-booking a barber/time slot).
+1. ✅ Real booking + availability — **done**
+2. ⏭ Admin login & protected dashboard — **next**
+3. ⏭ Booking management (confirm/cancel/reschedule from admin)
+4. ⏭ Payments / deposits at booking (Stripe)
+
+Later / supporting:
+- Wire up Firebase Firestore + Auth (see `database/SETUP.md`) — swap the local
+  store adapter for Firestore.
 - Email/SMS booking confirmations.
-- Real barber photography from the client.
-- Deploy frontend to Vercel and backend to Render.
+- Real barber photography + finalized content from the client.
+- Deploy the Next.js app to Vercel.
 
 ---
 
 ## 🧱 Tech Stack
 
-- **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS 3
-- **Backend:** Node.js, Express 4, CORS
-- **Database:** Firebase Firestore + Auth (planned)
-- **Hosting:** Vercel (frontend), Render/Railway (backend)
+- **Frontend + Backend:** Next.js 16 (App Router) — UI **and** API routes in one app
+- **Data layer:** local JSON file store now (`frontend/lib/store.js`), Firebase Firestore-ready
+- **Auth/DB (planned):** Firebase Firestore + Auth
+- **Hosting:** Vercel (single app)
 - **Tooling:** Git/GitHub
 
 ---
@@ -67,9 +84,10 @@ _Last updated: 2026-06-15_
 | Pages               | `frontend/app/`                        |
 | UI components       | `frontend/components/`                 |
 | Theme logic         | `frontend/components/ThemeProvider.js` |
-| Frontend sample data| `frontend/data/`                       |
-| API routes          | `backend/api/`                         |
-| API server          | `backend/index.js`                     |
+| Seed / reference data| `frontend/data/`                      |
+| API routes          | `frontend/app/api/`                     |
+| Data layer + booking logic | `frontend/lib/store.js`          |
+| Runtime booking store| `frontend/.data/bookings.json` (git-ignored) |
 | DB schema & seed    | `database/`                            |
 | Docs                | `docs/`                                |
 
@@ -94,8 +112,8 @@ _Last updated: 2026-06-15_
 
 - Confirm **budget and deadline** with the client and fill them in above.
 - Get **real barber photos** + accurate service prices from the client.
-- Decide whether to keep the standalone Express API or use Next.js API routes /
-  Firebase directly.
-- Set up the GitHub repo and CI before the next milestone.
-- The booking form currently simulates the save (no persistence) — hook it to
-  the API or Firestore next.
+- ✅ Decided: single Next.js app (UI + API routes), Firestore later. Express retired.
+- ✅ GitHub repo live: https://github.com/kewanim/aw-barbershop-website
+- **Next:** Feature 2 — admin login + protected `/admin` route.
+- Bookings persist to a local file in dev; swap `lib/store.js` to Firestore
+  before any production deploy (Vercel FS is ephemeral).

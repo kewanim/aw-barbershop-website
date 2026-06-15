@@ -1,16 +1,9 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import services from "@/data/services.json";
 import barbers from "@/data/barbers.json";
-
-// Available appointment time slots (the shop's opening hours in 30-min steps).
-const TIME_SLOTS = [
-  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
-];
 
 // The form is wrapped in <Suspense> because it uses useSearchParams(),
 // which Next.js requires to be inside a Suspense boundary.
@@ -40,21 +33,51 @@ function BookingForm() {
     notes: "",
   });
 
-  // After a successful submit we store the created booking to show a summary.
-  const [confirmed, setConfirmed] = useState(null);
   const [errors, setErrors] = useState({});
+  const [confirmed, setConfirmed] = useState(null); // booking returned by the API
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
+
+  // Live availability for the chosen barber/date/service.
+  const [availableTimes, setAvailableTimes] = useState([]);
+  const [loadingTimes, setLoadingTimes] = useState(false);
 
   // Only barbers marked available can be chosen.
-  const availableBarbers = useMemo(
-    () => barbers.filter((b) => b.available),
-    []
-  );
-
-  // Look up the selected service so we can show live price/duration.
+  const availableBarbers = useMemo(() => barbers.filter((b) => b.available), []);
   const selectedService = services.find((s) => s.id === form.serviceId);
 
   // Today's date in YYYY-MM-DD, used as the minimum selectable date.
   const today = new Date().toISOString().split("T")[0];
+
+  // Whenever the barber, date, or service changes, ask the API which start
+  // times are still open. This is what prevents double-booking.
+  useEffect(() => {
+    const { barberId, date, serviceId } = form;
+    if (!barberId || !date || !serviceId) {
+      setAvailableTimes([]);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingTimes(true);
+    fetch(`/api/availability?barberId=${barberId}&date=${date}&serviceId=${serviceId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (cancelled) return;
+        const times = json.data || [];
+        setAvailableTimes(times);
+        // If the currently picked time is no longer open, clear it.
+        setForm((prev) =>
+          prev.time && !times.includes(prev.time) ? { ...prev, time: "" } : prev
+        );
+      })
+      .catch(() => !cancelled && setAvailableTimes([]))
+      .finally(() => !cancelled && setLoadingTimes(false));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [form.barberId, form.date, form.serviceId]);
 
   function updateField(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -75,41 +98,44 @@ function BookingForm() {
     return Object.keys(next).length === 0;
   }
 
-  // On submit we build a booking object exactly like the ones in
-  // data/bookings.json. In production this would POST to the backend API
-  // (see backend/api/appointments.js); here we simulate a successful save.
-  function handleSubmit(e) {
+  // Submit the booking to the API. On success we show the confirmation screen
+  // with the server-assigned confirmation number. On a 409 (slot just taken)
+  // we refresh the open times so the user can pick again.
+  async function handleSubmit(e) {
     e.preventDefault();
+    setServerError("");
     if (!validate()) return;
 
-    const service = services.find((s) => s.id === form.serviceId);
-    const barber = barbers.find((b) => b.id === form.barberId);
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
 
-    const newBooking = {
-      id: `bk-${Math.floor(1000 + Math.random() * 9000)}`,
-      customerName: form.customerName,
-      customerEmail: form.customerEmail,
-      customerPhone: form.customerPhone,
-      serviceId: service.id,
-      serviceName: service.name,
-      barberId: barber.id,
-      barberName: barber.name,
-      date: form.date,
-      time: form.time,
-      price: service.price,
-      status: "pending",
-      notes: form.notes,
-    };
+      if (!res.ok) {
+        setServerError(json.error || "Something went wrong. Please try again.");
+        // If the slot was taken, refresh availability for the current selection.
+        if (res.status === 409) {
+          const r = await fetch(
+            `/api/availability?barberId=${form.barberId}&date=${form.date}&serviceId=${form.serviceId}`
+          );
+          const a = await r.json();
+          setAvailableTimes(a.data || []);
+          setForm((prev) => ({ ...prev, time: "" }));
+        }
+        return;
+      }
 
-    // Example of how you'd send this to the backend in production:
-    //   await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(newBooking),
-    //   });
-
-    setConfirmed(newBooking);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+      setConfirmed(json.data);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setServerError("Network error. Is the dev server running?");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // ---- Confirmation screen (shown after a successful booking) ----
@@ -151,6 +177,15 @@ function BookingForm() {
     );
   }
 
+  // Helper text for the time dropdown depending on what's selected.
+  const timeHint = !form.serviceId || !form.barberId || !form.date
+    ? "Pick a service, barber, and date to see open times"
+    : loadingTimes
+    ? "Checking availability…"
+    : availableTimes.length === 0
+    ? "No open times that day — try another date"
+    : null;
+
   // ---- Booking form ----
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
@@ -161,7 +196,14 @@ function BookingForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="card mt-10 space-y-6" noValidate>
+      {/* Server-side error banner (e.g. the slot was just taken) */}
+      {serverError && (
+        <div className="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+          {serverError}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="card mt-6 space-y-6" noValidate>
         {/* Name */}
         <Field label="Full Name" error={errors.customerName}>
           <input
@@ -242,10 +284,13 @@ function BookingForm() {
             <select
               value={form.time}
               onChange={(e) => updateField("time", e.target.value)}
+              disabled={availableTimes.length === 0}
               className={inputClass(errors.time)}
             >
-              <option value="">Choose a time…</option>
-              {TIME_SLOTS.map((t) => (
+              <option value="">
+                {timeHint ? timeHint : "Choose a time…"}
+              </option>
+              {availableTimes.map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
@@ -271,8 +316,8 @@ function BookingForm() {
           </div>
         )}
 
-        <button type="submit" className="btn-primary w-full">
-          Confirm Booking
+        <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+          {submitting ? "Booking…" : "Confirm Booking"}
         </button>
       </form>
     </div>
@@ -307,6 +352,7 @@ function inputClass(error) {
   return [
     "w-full rounded-lg border bg-white px-3 py-2 text-gray-900 shadow-sm outline-none transition",
     "focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/40",
+    "disabled:cursor-not-allowed disabled:opacity-60",
     "dark:bg-brand-charcoal dark:text-gray-100",
     error ? "border-red-400" : "border-gray-300 dark:border-gray-600",
   ].join(" ");

@@ -15,26 +15,15 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>. The site works fully with the bundled sample data
-— no backend or database required.
-
-## Run the backend API locally (optional)
-
-```bash
-cd barbershop-website/backend
-npm install
-npm start
-```
-
-The API runs at <http://localhost:4000>. Try `curl http://localhost:4000/api/services`.
-
-> To have the frontend call the API instead of reading JSON directly, set
-> `NEXT_PUBLIC_API_BASE_URL=http://localhost:4000` in `frontend/.env.local`
-> and swap the data imports for `fetch` calls (see `docs/ARCHITECTURE.md`).
+Open <http://localhost:3000>. UI and API run from the same app — no separate
+server needed. The API lives at `/api/*` (e.g. `curl http://localhost:3000/api/services`).
+Bookings you create persist to `frontend/.data/bookings.json` (git-ignored).
 
 ---
 
-## Deploy the frontend (Vercel — recommended)
+## Deploy (Vercel — recommended)
+
+Because the UI and API are one Next.js app, there's a single deploy.
 
 1. Push this repo to GitHub.
 2. Go to <https://vercel.com> → **New Project** → import the repo.
@@ -42,17 +31,15 @@ The API runs at <http://localhost:4000>. Try `curl http://localhost:4000/api/ser
 4. Add any `NEXT_PUBLIC_*` env vars from `frontend/.env.example`.
 5. Click **Deploy**. Vercel auto-detects Next.js.
 
-## Deploy the backend (Render / Railway / Fly.io)
-
-1. Create a new **Web Service** pointing at the `backend` folder.
-2. Build command: `npm install` · Start command: `npm start`.
-3. Set `PORT` if the host requires it (the server reads `process.env.PORT`).
-4. After deploy, update `NEXT_PUBLIC_API_BASE_URL` in the frontend to the new URL.
+> **Before deploying to production**, connect Firestore (next step). Vercel's
+> filesystem is read-only/ephemeral, so the local `.data/` file store is for
+> development only — the Firestore adapter replaces it for production.
 
 ## Connect a real database
 
 Follow [`database/SETUP.md`](../database/SETUP.md) to set up Firebase Firestore
-and seed it with `database/sample-data/`.
+and seed it with `database/sample-data/`. Then reimplement the functions in
+`frontend/lib/store.js` with Firestore calls — nothing else changes.
 
 ---
 
@@ -63,4 +50,4 @@ and seed it with `database/sample-data/`.
 | `next: command not found`            | Run `npm install` inside `frontend/` first.      |
 | Port 3000 already in use             | `npm run dev -- -p 3001` to use another port.     |
 | Styles not applying                  | Confirm `globals.css` is imported in `app/layout.js`. |
-| API CORS error                       | The backend enables CORS; check the API base URL. |
+| Bookings not persisting              | Check `frontend/.data/` is writable; delete it to reseed. |
