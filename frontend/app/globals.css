@@ -1,0 +1,36 @@
+/* Tailwind base layers — required for utility classes to work. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth color transitions when switching between light and dark mode. */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-gray-900 transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-brand-charcoal text-gray-100;
+}
+
+/* Reusable component classes built from Tailwind utilities. */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-brand-gold px-6 py-3 font-semibold text-brand-charcoal shadow-sm transition hover:bg-brand-goldDark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-gold focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-brand-gold px-6 py-3 font-semibold text-brand-gold transition hover:bg-brand-gold hover:text-brand-charcoal;
+  }
+
+  .card {
+    @apply rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-colors dark:border-gray-700 dark:bg-brand-slate;
+  }
+
+  .section-title {
+    @apply text-3xl font-bold tracking-tight sm:text-4xl;
+  }
+}

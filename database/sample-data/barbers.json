@@ -1,0 +1,38 @@
+[
+  {
+    "id": "barber-001",
+    "name": "Marcus Reed",
+    "title": "Master Barber & Owner",
+    "bio": "With over 15 years behind the chair, Marcus specializes in classic cuts, precision fades, and hot-towel straight razor shaves.",
+    "photoDescription": "Confident Black man in his late 30s with a sharp short fade and a neatly lined beard, wearing a black barber apron over a white tee.",
+    "photoUrl": "https://images.unsplash.com/photo-1503443207922-dff7d543fd0e?auto=format&fit=crop&w=400&q=80",
+    "specialties": ["Skin Fades", "Straight Razor Shaves", "Beard Sculpting"],
+    "rating": 4.9,
+    "yearsExperience": 15,
+    "available": true
+  },
+  {
+    "id": "barber-002",
+    "name": "Diego Alvarez",
+    "title": "Senior Barber",
+    "bio": "Diego brings a modern flair to every cut, known for textured crops, designs, and color work that turn heads.",
+    "photoDescription": "Latino man in his late 20s with a textured pompadour and faded sides, smiling, wearing a dark denim shirt with sleeves rolled up.",
+    "photoUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+    "specialties": ["Textured Crops", "Hair Designs", "Color"],
+    "rating": 4.8,
+    "yearsExperience": 8,
+    "available": true
+  },
+  {
+    "id": "barber-003",
+    "name": "Tyler Brooks",
+    "title": "Barber & Grooming Specialist",
+    "bio": "Tyler is the go-to for beard grooming and kid-friendly cuts, with a calm chair-side manner that keeps everyone comfortable.",
+    "photoDescription": "Young white man in his mid 20s with a medium-length quiff and a full groomed beard, wearing a flannel shirt and round glasses.",
+    "photoUrl": "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=400&q=80",
+    "specialties": ["Beard Grooming", "Kids Cuts", "Scissor Work"],
+    "rating": 4.7,
+    "yearsExperience": 5,
+    "available": false
+  }
+]
