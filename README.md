@@ -4,7 +4,7 @@ A complete, production-ready barbershop website: a modern **Next.js + Tailwind
 CSS** frontend, an **Express** REST API, and a **Firebase**-ready data layer.
 It ships with realistic sample data so everything works the moment you run it.
 
-![Tech](https://img.shields.io/badge/Next.js-14-black) ![Tech](https://img.shields.io/badge/React-18-blue) ![Tech](https://img.shields.io/badge/Tailwind-3-38bdf8) ![Tech](https://img.shields.io/badge/Express-4-green)
+![Tech](https://img.shields.io/badge/Next.js-16-black) ![Tech](https://img.shields.io/badge/React-19-blue) ![Tech](https://img.shields.io/badge/Tailwind-3-38bdf8) ![Tech](https://img.shields.io/badge/Express-4-green)
 
 ---
 
@@ -48,7 +48,7 @@ npm start          # http://localhost:4000
 
 | Layer     | Tools                                      |
 | --------- | ------------------------------------------ |
-| Frontend  | Next.js 14 (App Router), React 18, Tailwind CSS 3 |
+| Frontend  | Next.js 16 (App Router), React 19, Tailwind CSS 3 |
 | Backend   | Node.js, Express 4, CORS                    |
 | Database  | Firebase Firestore (template provided)      |
 | Hosting   | Vercel (frontend), Render/Railway (backend) |

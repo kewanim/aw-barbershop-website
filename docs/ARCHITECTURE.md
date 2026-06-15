@@ -37,7 +37,7 @@ How the pieces of the AW Barbershop project fit together.
 
 ## Frontend
 
-- **App Router** (Next.js 14) — each route is a folder under `frontend/app/`.
+- **App Router** (Next.js 16) — each route is a folder under `frontend/app/`.
 - **`ThemeProvider`** (`components/ThemeProvider.js`) holds the light/dark state.
   On first load it picks dark mode in the evening (6 PM–6 AM) and light during
   the day, then remembers any manual toggle in `localStorage`.

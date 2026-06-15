@@ -52,7 +52,7 @@ _Last updated: 2026-06-15_
 
 ## 🧱 Tech Stack
 
-- **Frontend:** Next.js 14 (App Router), React 18, Tailwind CSS 3
+- **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS 3
 - **Backend:** Node.js, Express 4, CORS
 - **Database:** Firebase Firestore + Auth (planned)
 - **Hosting:** Vercel (frontend), Render/Railway (backend)

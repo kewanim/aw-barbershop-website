@@ -6,8 +6,8 @@ The tools used in this project and why.
 
 | Tool             | Version | Why                                                        |
 | ---------------- | ------- | ---------------------------------------------------------- |
-| **Next.js**      | 14.x    | React framework with the App Router, file-based routing, and great DX. |
-| **React**        | 18.x    | Component-based UI library.                                |
+| **Next.js**      | 16.x    | React framework with the App Router, file-based routing, and great DX. |
+| **React**        | 19.x    | Component-based UI library.                                |
 | **Tailwind CSS** | 3.x     | Utility-first styling — fast, consistent, responsive.      |
 | **PostCSS / Autoprefixer** | — | Build pipeline for Tailwind + vendor prefixes.   |
 
