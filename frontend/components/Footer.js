@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TibebBorder from "@/components/TibebBorder";
 
 // Site footer with contact details, hours, and quick links.
 // Rendered on every page via the root layout.
@@ -6,7 +7,9 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-brand-slate">
+    <footer className="bg-gray-50 dark:bg-brand-slate">
+      {/* Tibeb trim along the top edge of the footer. */}
+      <TibebBorder />
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-3">
         {/* Brand + tagline */}
         <div>

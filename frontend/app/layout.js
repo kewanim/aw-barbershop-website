@@ -2,6 +2,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import TibebBorder from "@/components/TibebBorder";
 
 // Page metadata used by Next.js for the <head> tag and SEO.
 export const metadata = {
@@ -18,6 +19,8 @@ export default function RootLayout({ children }) {
       <body className="flex min-h-screen flex-col">
         <ThemeProvider>
           <Navbar />
+          {/* Ethiopian tibeb accent strip under the header, site-wide. */}
+          <TibebBorder />
           <main className="flex-1">{children}</main>
           <Footer />
         </ThemeProvider>

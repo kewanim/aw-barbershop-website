@@ -1,6 +1,7 @@
 import Link from "next/link";
 import services from "@/data/services.json";
 import barbers from "@/data/barbers.json";
+import TibebBorder from "@/components/TibebBorder";
 
 // Homepage: a hero section, a few featured services, the barber team, and a
 // closing call-to-action. All content is fully responsive and theme-aware.
@@ -14,8 +15,14 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-brand-charcoal text-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 md:grid-cols-2 md:items-center md:py-28">
           <div>
-            <p className="mb-3 font-semibold uppercase tracking-widest text-brand-gold">
-              Silver Spring, MD
+            <p className="mb-3 flex items-center gap-2 font-semibold tracking-widest text-brand-gold">
+              {/* Ethiopian flag colors */}
+              <span className="inline-flex gap-1" aria-hidden="true">
+                <span className="h-2.5 w-2.5 rounded-full bg-brand-green" />
+                <span className="h-2.5 w-2.5 rounded-full bg-brand-gold" />
+                <span className="h-2.5 w-2.5 rounded-full bg-brand-red" />
+              </span>
+              <span>እንኳን ደህና መጡ · Silver Spring, MD</span>
             </p>
             <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl">
               Where hair dreams
@@ -85,8 +92,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------------- Meet the Barbers ---------------- */}
-      <section className="bg-gray-50 py-16 dark:bg-brand-slate/40">
+      {/* ---------------- Meet the Team (framed with tibeb, like habesha cloth) ---------------- */}
+      <TibebBorder />
+      <section className="bg-brand-cream py-16 dark:bg-brand-slate/40">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-10 text-center">
             <h2 className="section-title">Meet the Team</h2>
@@ -119,6 +127,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <TibebBorder />
 
       {/* ---------------- Testimonials (real Google reviews) ---------------- */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">

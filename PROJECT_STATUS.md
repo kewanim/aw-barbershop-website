@@ -151,6 +151,10 @@ Real content pulled from the live site (awbeautysalon.com) and applied:
 - ✅ Real team: **Asmamaw** (Barber), **Joseph** (Hair Stylist)
 - ✅ Two real Google testimonials (Monica B., Christopher Harris)
 - ✅ Unisex service menu (men's hair, beard & shave, women's hair)
+- ✅ **Ethiopian traditional design theme**: a *tibeb* (ጥበብ) woven-trim accent
+  band (green/gold/red) under the header, framing sections, and on the footer;
+  Amharic welcome (እንኳን ደህና መጡ) + flag-color accents; warm habesha cream tones.
+  Reusable `components/TibebBorder.js`.
 
 **Still placeholder / needed from client:**
 - ⛳ **Service prices** — not on live site; current numbers are placeholders.
