@@ -8,6 +8,8 @@ export async function GET(request) {
   const barberId = searchParams.get("barberId");
   const date = searchParams.get("date");
   const serviceId = searchParams.get("serviceId");
+  // Optional: ignore a specific booking (used when rescheduling it).
+  const exclude = searchParams.get("exclude") || null;
 
   if (!barberId || !date || !serviceId) {
     return NextResponse.json(
@@ -16,6 +18,6 @@ export async function GET(request) {
     );
   }
 
-  const slots = await getAvailability(barberId, date, serviceId);
+  const slots = await getAvailability(barberId, date, serviceId, exclude);
   return NextResponse.json({ count: slots.length, data: slots });
 }

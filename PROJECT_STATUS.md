@@ -55,12 +55,23 @@ _Last updated: 2026-06-15_
   booking creation stays open so customers don't need an account.
 - Demo logins: `admin / admin123`, `marcus / marcus123` (change before launch).
 
+### ✅ Feature 3 — Booking management (done)
+- Admin bookings table now has an **Actions** column:
+  - **Confirm** a pending booking, **Cancel** an active one.
+  - **Reschedule** via a modal that shows the barber's open slots for the new
+    date (re-checked server-side, excluding the booking being moved → 409 on
+    conflict, so a reschedule can't double-book).
+  - **Delete** a cancelled booking permanently.
+- All actions hit the protected `PUT`/`DELETE /api/appointments/:id` endpoints
+  and refresh the table; errors surface in a banner.
+
 ---
 
 ## 🚧 In Progress
 
-- **Feature 3 — Booking management** (next up): confirm / cancel / reschedule
-  appointments directly from the admin dashboard (wired to the PUT/DELETE API).
+- **Feature 4 — Payments / deposits** (next up): take a deposit at booking via
+  Stripe. **Needs client input** — a Stripe account + test API keys — and
+  involves money, so we'll confirm before wiring it up.
 
 ---
 
@@ -68,8 +79,8 @@ _Last updated: 2026-06-15_
 
 1. ✅ Real booking + availability — **done**
 2. ✅ Admin login & protected dashboard — **done**
-3. ⏭ Booking management (confirm/cancel/reschedule from admin) — **next**
-4. ⏭ Payments / deposits at booking (Stripe)
+3. ✅ Booking management (confirm/cancel/reschedule from admin) — **done**
+4. ⏭ Payments / deposits at booking (Stripe) — **next** (needs Stripe keys)
 
 Later / supporting:
 - Wire up Firebase Firestore + Auth (see `database/SETUP.md`) — swap the local

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import barbers from "@/data/barbers.json";
 import services from "@/data/services.json";
 
-// Basic admin dashboard. Shows summary stats and a filterable table of all
-// bookings, fetched live from the API (/api/appointments) — so bookings made on
-// the booking page show up here.
+// Admin dashboard. Shows summary stats and a filterable table of all bookings
+// (fetched live from the API), plus per-booking management: confirm, cancel,
+// reschedule, and delete — all wired to the protected /api/appointments routes.
 export default function AdminPage() {
   const router = useRouter();
   const [filter, setFilter] = useState("all");
@@ -15,21 +15,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [staff, setStaff] = useState(null); // the signed-in staff member
-
-  // Load the current staff member's name to greet them in the header.
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => json && setStaff(json.data))
-      .catch(() => {});
-  }, []);
-
-  // Log out: clear the session cookie, then return to the login page.
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.replace("/login");
-    router.refresh();
-  }
+  const [rescheduleFor, setRescheduleFor] = useState(null); // booking being moved
 
   // Load all bookings from the API.
   const loadBookings = useCallback(async () => {
@@ -50,11 +36,53 @@ export default function AdminPage() {
     loadBookings();
   }, [loadBookings]);
 
+  // Greet the signed-in staff member.
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => json && setStaff(json.data))
+      .catch(() => {});
+  }, []);
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/login");
+    router.refresh();
+  }
+
+  // Update a booking's status (confirm / cancel).
+  async function patchBooking(id, patch) {
+    setError("");
+    const res = await fetch(`/api/appointments/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(json.error || "Update failed.");
+      return;
+    }
+    loadBookings();
+  }
+
+  // Permanently delete a booking (used for cancelled rows).
+  async function removeBooking(id) {
+    if (!window.confirm("Delete this booking permanently?")) return;
+    setError("");
+    const res = await fetch(`/api/appointments/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      setError(j.error || "Delete failed.");
+      return;
+    }
+    loadBookings();
+  }
+
   // Derived summary statistics for the stat cards.
   const stats = useMemo(() => {
     const confirmed = bookings.filter((b) => b.status === "confirmed");
     const pending = bookings.filter((b) => b.status === "pending");
-    // Only count revenue from bookings that aren't cancelled.
     const revenue = bookings
       .filter((b) => b.status !== "cancelled")
       .reduce((sum, b) => sum + b.price, 0);
@@ -66,7 +94,6 @@ export default function AdminPage() {
     };
   }, [bookings]);
 
-  // Apply the status filter to the bookings table.
   const visibleBookings =
     filter === "all" ? bookings : bookings.filter((b) => b.status === filter);
 
@@ -76,7 +103,7 @@ export default function AdminPage() {
         <div>
           <h1 className="section-title">Admin Dashboard</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-300">
-            {staff ? `Signed in as ${staff.name} (${staff.role})` : "Overview of appointments, barbers, and services."}
+            {staff ? `Signed in as ${staff.name} (${staff.role})` : "Overview of appointments, team, and services."}
           </p>
         </div>
         <div className="flex gap-2">
@@ -125,24 +152,24 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Horizontal scroll on small screens keeps the table readable. */}
         <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-gray-50 text-gray-500 dark:bg-brand-slate dark:text-gray-300">
               <tr>
                 <th className="px-4 py-3 font-semibold">Customer</th>
                 <th className="px-4 py-3 font-semibold">Service</th>
-                <th className="px-4 py-3 font-semibold">Barber</th>
+                <th className="px-4 py-3 font-semibold">With</th>
                 <th className="px-4 py-3 font-semibold">Date</th>
                 <th className="px-4 py-3 font-semibold">Time</th>
                 <th className="px-4 py-3 font-semibold">Price</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {loading && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                     Loading bookings…
                   </td>
                 </tr>
@@ -159,11 +186,35 @@ export default function AdminPage() {
                   <td className="px-4 py-3">{b.time}</td>
                   <td className="px-4 py-3 font-medium">${b.price}</td>
                   <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {b.status === "pending" && (
+                        <button onClick={() => patchBooking(b.id, { status: "confirmed" })} className={actionBtn("green")}>
+                          Confirm
+                        </button>
+                      )}
+                      {b.status !== "cancelled" && (
+                        <>
+                          <button onClick={() => setRescheduleFor(b)} className={actionBtn("gold")}>
+                            Reschedule
+                          </button>
+                          <button onClick={() => patchBooking(b.id, { status: "cancelled" })} className={actionBtn("red")}>
+                            Cancel
+                          </button>
+                        </>
+                      )}
+                      {b.status === "cancelled" && (
+                        <button onClick={() => removeBooking(b.id)} className={actionBtn("gray")}>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {!loading && visibleBookings.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                     No {filter} bookings.
                   </td>
                 </tr>
@@ -173,7 +224,7 @@ export default function AdminPage() {
         </div>
       </section>
 
-      {/* ---------------- Barbers + Services summary ---------------- */}
+      {/* ---------------- Team + Services summary ---------------- */}
       <div className="mt-10 grid gap-8 lg:grid-cols-2">
         <section>
           <h2 className="mb-4 text-xl font-bold">Team ({barbers.length})</h2>
@@ -214,11 +265,137 @@ export default function AdminPage() {
           </ul>
         </section>
       </div>
+
+      {/* Reschedule modal */}
+      {rescheduleFor && (
+        <RescheduleModal
+          booking={rescheduleFor}
+          onClose={() => setRescheduleFor(null)}
+          onSaved={() => {
+            setRescheduleFor(null);
+            loadBookings();
+          }}
+        />
+      )}
     </div>
   );
 }
 
+/* ---------- Reschedule modal ---------- */
+
+// A small dialog to move a booking to a new date/time. It fetches the barber's
+// open slots for the chosen date (excluding this booking) so staff can only
+// pick a genuinely free time.
+function RescheduleModal({ booking, onClose, onSaved }) {
+  const [date, setDate] = useState(booking.date);
+  const [time, setTime] = useState(booking.time);
+  const [times, setTimes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const today = new Date().toISOString().split("T")[0];
+
+  // Refresh open slots whenever the date changes.
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(
+      `/api/availability?barberId=${booking.barberId}&date=${date}&serviceId=${booking.serviceId}&exclude=${booking.id}`
+    )
+      .then((r) => r.json())
+      .then((j) => {
+        if (cancelled) return;
+        const t = j.data || [];
+        setTimes(t);
+        if (!t.includes(time)) setTime("");
+      })
+      .catch(() => !cancelled && setTimes([]))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date]);
+
+  async function save() {
+    if (!date || !time) {
+      setError("Pick a date and time.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    const res = await fetch(`/api/appointments/${booking.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, time }),
+    });
+    const json = await res.json().catch(() => ({}));
+    setSaving(false);
+    if (!res.ok) {
+      setError(json.error || "Could not reschedule.");
+      return;
+    }
+    onSaved();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-brand-slate">
+        <h3 className="text-lg font-bold">Reschedule appointment</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          {booking.customerName} · {booking.serviceName} · {booking.barberName}
+        </p>
+
+        {error && (
+          <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium">Date</span>
+            <input type="date" min={today} value={date} onChange={(e) => setDate(e.target.value)} className={modalInput} />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium">Time</span>
+            <select value={time} onChange={(e) => setTime(e.target.value)} disabled={times.length === 0} className={modalInput}>
+              <option value="">
+                {loading ? "Checking…" : times.length === 0 ? "No open times" : "Choose a time…"}
+              </option>
+              {times.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-2">
+          <button onClick={onClose} className="btn-outline px-4 py-2 text-sm">Cancel</button>
+          <button onClick={save} disabled={saving} className="btn-primary px-4 py-2 text-sm disabled:opacity-60">
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const modalInput =
+  "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 outline-none transition focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-brand-charcoal dark:text-gray-100";
+
 /* ---------- Helpers ---------- */
+
+// Compact action button styling by intent color.
+function actionBtn(color) {
+  const map = {
+    green: "border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300",
+    red: "border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300",
+    gold: "border-brand-gold text-brand-goldDark hover:bg-brand-gold/10",
+    gray: "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300",
+  };
+  return `rounded-md border px-2 py-1 text-xs font-medium transition ${map[color]}`;
+}
 
 // A single summary stat card with an optional accent color.
 function StatCard({ label, value, accent }) {

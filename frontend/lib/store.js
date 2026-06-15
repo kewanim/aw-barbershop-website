@@ -106,7 +106,10 @@ export async function getBooking(id) {
 // Compute the available start times for a barber on a date for a given service.
 // A slot is available when the service fits within opening hours AND doesn't
 // overlap any existing (non-cancelled) booking for that barber that day.
-export async function getAvailability(barberId, date, serviceId) {
+//
+// `excludeBookingId` lets a reschedule ignore the booking being moved, so its
+// own current slot doesn't count as "busy" against itself.
+export async function getAvailability(barberId, date, serviceId, excludeBookingId = null) {
   const duration = serviceDuration(serviceId);
   const bookings = await readBookings();
 
@@ -116,7 +119,8 @@ export async function getAvailability(barberId, date, serviceId) {
       (b) =>
         b.barberId === barberId &&
         b.date === date &&
-        b.status !== "cancelled"
+        b.status !== "cancelled" &&
+        b.id !== excludeBookingId
     )
     .map((b) => {
       const start = toMinutes(b.time);
@@ -185,14 +189,37 @@ export async function createBooking(input) {
   return { data: booking };
 }
 
-// Update an existing booking (partial). Returns { data } or { error, status }.
+// Update an existing booking (partial). Used by admin to confirm/cancel and to
+// reschedule. When the date or time changes, the new slot is re-checked against
+// the barber's other bookings (excluding this one) to prevent double-booking.
+// Returns { data } or { error, status }.
 export async function updateBooking(id, patch) {
   const bookings = await readBookings();
   const index = bookings.findIndex((b) => b.id === id);
   if (index === -1) return { error: "Booking not found", status: 404 };
 
+  const current = bookings[index];
+
+  // Reschedule guard: only when actually moving the date/time.
+  const movingTo =
+    (patch.date && patch.date !== current.date) ||
+    (patch.time && patch.time !== current.time);
+  if (movingTo) {
+    const date = patch.date || current.date;
+    const time = patch.time || current.time;
+    const barberId = patch.barberId || current.barberId;
+    const serviceId = patch.serviceId || current.serviceId;
+    const open = await getAvailability(barberId, date, serviceId, id);
+    if (!open.includes(time)) {
+      return {
+        error: "That slot isn't available. Please pick another time.",
+        status: 409,
+      };
+    }
+  }
+
   // Never allow the id to be overwritten.
-  bookings[index] = { ...bookings[index], ...patch, id: bookings[index].id };
+  bookings[index] = { ...current, ...patch, id: current.id };
   await writeBookings(bookings);
   return { data: bookings[index] };
 }

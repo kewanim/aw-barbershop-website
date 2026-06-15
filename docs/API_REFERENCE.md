@@ -21,8 +21,15 @@ Full CRUD for bookings.
 | GET    | `/api/appointments`      | List bookings. Optional `?status=confirmed\|pending\|cancelled`. |
 | POST   | `/api/appointments`      | Create a booking (validates input + re-checks availability). |
 | GET    | `/api/appointments/:id`  | Get one booking.                     |
-| PUT    | `/api/appointments/:id`  | Update a booking (partial allowed).  |
+| PUT    | `/api/appointments/:id`  | Update a booking — confirm/cancel (`{status}`) or reschedule (`{date, time}`). |
 | DELETE | `/api/appointments/:id`  | Delete a booking.                    |
+
+Rescheduling (sending a new `date`/`time`) re-checks the barber's availability
+on the server, ignoring the booking being moved, and returns **409** if the new
+slot conflicts with another appointment.
+
+The availability endpoint accepts an optional `&exclude=<bookingId>` so the
+reschedule UI can list slots without counting the booking against itself.
 
 **Create example**
 
