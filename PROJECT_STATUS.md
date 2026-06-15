@@ -154,7 +154,13 @@ Real content pulled from the live site (awbeautysalon.com) and applied:
 - ✅ **Ethiopian traditional design theme**: a *tibeb* (ጥበብ) woven-trim accent
   band (green/gold/red) under the header, framing sections, and on the footer;
   Amharic welcome (እንኳን ደህና መጡ) + flag-color accents; warm habesha cream tones.
-  Reusable `components/TibebBorder.js`.
+  Reusable `components/TibebBorder.js`. Services & Booking pages use a cream
+  tibeb-framed header (`components/PageHeader.js`).
+- ✅ **White, Apple-style homepage**: white-forward hero with large centered
+  type, a smooth auto-advancing gallery carousel (`components/Carousel.js`,
+  Apple easing + pause-on-hover + arrows/dots), and scroll-reveal animations
+  (`components/Reveal.js` via IntersectionObserver; respects reduced-motion).
+  Gallery uses placeholder stock photos — swap for the salon's real images.
 
 **Still placeholder / needed from client:**
 - ⛳ **Service prices** — not on live site; current numbers are placeholders.
