@@ -1,0 +1,21 @@
+# Netlify configuration for the AW Beauty Salon site.
+#
+# The Next.js app lives in the frontend/ subdirectory, so Netlify builds from
+# there. The official Next.js plugin runs the server code (API routes, admin
+# auth, booking, etc.) on Netlify Functions (a Node runtime), so everything
+# works as-is — no code changes needed vs. Vercel.
+#
+# Persistence note: to use the Upstash/KV database on Netlify, add the same
+# KV_REST_API_URL and KV_REST_API_TOKEN as environment variables in the Netlify
+# site settings. Without them the app falls back to in-memory data (fine for a
+# demo; resets on idle).
+
+[build]
+  base = "frontend"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
