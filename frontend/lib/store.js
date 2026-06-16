@@ -13,6 +13,7 @@
 
 import path from "path";
 import { promises as fs } from "fs";
+import { Redis } from "@upstash/redis";
 
 import servicesSeed from "@/data/services.json";
 import barbersSeed from "@/data/barbers.json";
@@ -21,11 +22,29 @@ import staffSeed from "@/data/staff.json";
 import customersSeed from "@/data/customers.json";
 import { hashPassword, verifyPassword } from "@/lib/auth";
 
-// Where runtime data lives. Git-ignored; seeded on first use.
+// Where runtime data lives locally. Git-ignored; seeded on first use.
 const DATA_DIR = path.join(process.cwd(), ".data");
 const BOOKINGS_FILE = path.join(DATA_DIR, "bookings.json");
 const STAFF_FILE = path.join(DATA_DIR, "staff.json");
 const CUSTOMERS_FILE = path.join(DATA_DIR, "customers.json");
+
+// Keys used in the Vercel KV / Upstash Redis store (production persistence).
+const KV_BOOKINGS = "aw:bookings";
+const KV_STAFF = "aw:staff";
+const KV_CUSTOMERS = "aw:customers";
+
+// Connect to Vercel KV (Upstash) when its env vars are present, otherwise run
+// on the local file/in-memory store. This is what makes data PERMANENT in
+// production: once the KV store is connected on Vercel, all reads/writes go
+// there. Locally (no KV vars) nothing changes — it uses .data/ as before.
+let _redis;
+function getRedis() {
+  if (_redis !== undefined) return _redis;
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  _redis = url && token ? new Redis({ url, token }) : null;
+  return _redis;
+}
 
 // Shop opening hours, in minutes since midnight (09:00–18:00) and slot size.
 const OPEN_MIN = 9 * 60; // 09:00
@@ -84,8 +103,16 @@ async function writeFileSafe(file, data) {
   }
 }
 
-// Bookings: from disk if present, else seeded from sample data; cached in memory.
+// Bookings: read from KV (prod) or disk/memory (local); seed on first access.
 async function readBookings() {
+  const redis = getRedis();
+  if (redis) {
+    const data = await redis.get(KV_BOOKINGS);
+    if (data) return data;
+    const seeded = bookingsSeed.map((b) => ({ ...b }));
+    await redis.set(KV_BOOKINGS, seeded);
+    return seeded;
+  }
   if (bookingsCache) return bookingsCache;
   const fromDisk = await readFileSafe(BOOKINGS_FILE);
   bookingsCache = fromDisk || bookingsSeed.map((b) => ({ ...b }));
@@ -94,6 +121,11 @@ async function readBookings() {
 }
 
 async function writeBookings(bookings) {
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(KV_BOOKINGS, bookings);
+    return;
+  }
   bookingsCache = bookings;
   await writeFileSafe(BOOKINGS_FILE, bookings);
 }
@@ -273,21 +305,30 @@ export async function deleteBooking(id) {
 // plain seed passwords are hashed (scrypt) before they're written to disk, so
 // the runtime store (.data/staff.json) never contains plain-text passwords.
 
-async function readStaff() {
-  if (staffCache) return staffCache;
-  const fromDisk = await readFileSafe(STAFF_FILE);
-  if (fromDisk) {
-    staffCache = fromDisk;
-    return staffCache;
-  }
-  staffCache = staffSeed.map((s) => ({
+// Build the seeded staff list (hashing the sample passwords).
+function seedStaff() {
+  return staffSeed.map((s) => ({
     id: s.id,
     username: s.username,
     name: s.name,
     role: s.role,
     passwordHash: hashPassword(s.password),
   }));
-  await writeFileSafe(STAFF_FILE, staffCache);
+}
+
+async function readStaff() {
+  const redis = getRedis();
+  if (redis) {
+    const data = await redis.get(KV_STAFF);
+    if (data) return data;
+    const seeded = seedStaff();
+    await redis.set(KV_STAFF, seeded);
+    return seeded;
+  }
+  if (staffCache) return staffCache;
+  const fromDisk = await readFileSafe(STAFF_FILE);
+  staffCache = fromDisk || seedStaff();
+  if (!fromDisk) await writeFileSafe(STAFF_FILE, staffCache);
   return staffCache;
 }
 
@@ -314,25 +355,39 @@ export async function verifyStaffCredentials(username, password) {
 // history, and (in Phase 4b) save a card on file. Passwords are scrypt-hashed,
 // same as staff. The `stripeCustomerId` is populated later when Stripe is wired.
 
-async function readCustomers() {
-  if (customersCache) return customersCache;
-  const fromDisk = await readFileSafe(CUSTOMERS_FILE);
-  if (fromDisk) {
-    customersCache = fromDisk;
-    return customersCache;
-  }
-  customersCache = customersSeed.map((c) => ({
+// Build the seeded customer list (hashing the sample passwords).
+function seedCustomers() {
+  return customersSeed.map((c) => ({
     id: c.id,
     name: c.name,
     email: c.email,
     passwordHash: hashPassword(c.password),
     stripeCustomerId: c.stripeCustomerId || null,
   }));
-  await writeFileSafe(CUSTOMERS_FILE, customersCache);
+}
+
+async function readCustomers() {
+  const redis = getRedis();
+  if (redis) {
+    const data = await redis.get(KV_CUSTOMERS);
+    if (data) return data;
+    const seeded = seedCustomers();
+    await redis.set(KV_CUSTOMERS, seeded);
+    return seeded;
+  }
+  if (customersCache) return customersCache;
+  const fromDisk = await readFileSafe(CUSTOMERS_FILE);
+  customersCache = fromDisk || seedCustomers();
+  if (!fromDisk) await writeFileSafe(CUSTOMERS_FILE, customersCache);
   return customersCache;
 }
 
 async function writeCustomers(list) {
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(KV_CUSTOMERS, list);
+    return;
+  }
   customersCache = list;
   await writeFileSafe(CUSTOMERS_FILE, list);
 }

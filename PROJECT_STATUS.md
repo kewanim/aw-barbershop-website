@@ -78,6 +78,14 @@ _Last updated: 2026-06-15_
 - **Admin "Mark paid"** action + Payment column records the payment.
 - Demo customer: `monica@example.com / password123` (seeded with history).
 
+### ✅ Database — Vercel KV (Upstash) wired in
+- `lib/store.js` now reads/writes **Vercel KV (Upstash Redis)** when its env
+  vars are present (production), and **auto-seeds** from the sample data on first
+  access. Falls back to the local `.data/` file store when KV isn't configured
+  (local dev), so nothing changes locally. Keys: `aw:bookings`, `aw:staff`,
+  `aw:customers`. **Action:** create a KV store in the Vercel dashboard and
+  connect it to the project, then redeploy → data becomes permanent.
+
 ## 🚧 In Progress
 
 - **Feature 4b — Stripe saved cards** (next up): save a card on file per
