@@ -7,7 +7,7 @@ import TibebBorder from "@/components/TibebBorder";
 export default function PageHeader({ title, subtitle }) {
   return (
     <header>
-      <div className="bg-brand-cream py-10 text-center dark:bg-brand-slate/40">
+      <div className="bg-gray-50 py-12 text-center dark:bg-brand-slate/40">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <h1 className="section-title">{title}</h1>
           {subtitle && (

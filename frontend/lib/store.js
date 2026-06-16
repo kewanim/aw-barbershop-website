@@ -53,25 +53,49 @@ function serviceDuration(serviceId) {
   return svc ? svc.durationMinutes : SLOT_STEP;
 }
 
-/* --------------------------- low-level storage --------------------------- */
+/* --------------------------- low-level storage ---------------------------
+   Data is held in memory and persisted to disk on a best-effort basis. On a
+   normal machine (local dev) this writes JSON files under .data/. On a
+   read-only / ephemeral serverless filesystem (e.g. Vercel) the writes are
+   skipped silently and data simply lives in memory for the life of the
+   instance — so the app works everywhere without crashing. Swap these for
+   Firestore for durable production storage. */
 
-// Read all bookings from disk, seeding the file from the sample data the first
-// time it's accessed.
-async function readBookings() {
+let bookingsCache = null;
+let staffCache = null;
+let customersCache = null;
+
+// Read + parse a JSON file; returns null if it can't be read.
+async function readFileSafe(file) {
   try {
-    const raw = await fs.readFile(BOOKINGS_FILE, "utf8");
-    return JSON.parse(raw);
+    return JSON.parse(await fs.readFile(file, "utf8"));
   } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(BOOKINGS_FILE, JSON.stringify(bookingsSeed, null, 2));
-    return [...bookingsSeed];
+    return null;
   }
 }
 
-// Persist the full bookings array back to disk.
+// Write JSON to disk if possible; ignore failures (read-only FS on serverless).
+async function writeFileSafe(file, data) {
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(file, JSON.stringify(data, null, 2));
+  } catch {
+    /* read-only filesystem (e.g. Vercel) — data stays in memory only */
+  }
+}
+
+// Bookings: from disk if present, else seeded from sample data; cached in memory.
+async function readBookings() {
+  if (bookingsCache) return bookingsCache;
+  const fromDisk = await readFileSafe(BOOKINGS_FILE);
+  bookingsCache = fromDisk || bookingsSeed.map((b) => ({ ...b }));
+  if (!fromDisk) await writeFileSafe(BOOKINGS_FILE, bookingsCache);
+  return bookingsCache;
+}
+
 async function writeBookings(bookings) {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(BOOKINGS_FILE, JSON.stringify(bookings, null, 2));
+  bookingsCache = bookings;
+  await writeFileSafe(BOOKINGS_FILE, bookings);
 }
 
 // Simple unique-ish id, e.g. "bk-4821".
@@ -250,21 +274,21 @@ export async function deleteBooking(id) {
 // the runtime store (.data/staff.json) never contains plain-text passwords.
 
 async function readStaff() {
-  try {
-    const raw = await fs.readFile(STAFF_FILE, "utf8");
-    return JSON.parse(raw);
-  } catch {
-    const seeded = staffSeed.map((s) => ({
-      id: s.id,
-      username: s.username,
-      name: s.name,
-      role: s.role,
-      passwordHash: hashPassword(s.password),
-    }));
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(STAFF_FILE, JSON.stringify(seeded, null, 2));
-    return seeded;
+  if (staffCache) return staffCache;
+  const fromDisk = await readFileSafe(STAFF_FILE);
+  if (fromDisk) {
+    staffCache = fromDisk;
+    return staffCache;
   }
+  staffCache = staffSeed.map((s) => ({
+    id: s.id,
+    username: s.username,
+    name: s.name,
+    role: s.role,
+    passwordHash: hashPassword(s.password),
+  }));
+  await writeFileSafe(STAFF_FILE, staffCache);
+  return staffCache;
 }
 
 // List staff without exposing password hashes.
@@ -291,26 +315,26 @@ export async function verifyStaffCredentials(username, password) {
 // same as staff. The `stripeCustomerId` is populated later when Stripe is wired.
 
 async function readCustomers() {
-  try {
-    const raw = await fs.readFile(CUSTOMERS_FILE, "utf8");
-    return JSON.parse(raw);
-  } catch {
-    const seeded = customersSeed.map((c) => ({
-      id: c.id,
-      name: c.name,
-      email: c.email,
-      passwordHash: hashPassword(c.password),
-      stripeCustomerId: c.stripeCustomerId || null,
-    }));
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(CUSTOMERS_FILE, JSON.stringify(seeded, null, 2));
-    return seeded;
+  if (customersCache) return customersCache;
+  const fromDisk = await readFileSafe(CUSTOMERS_FILE);
+  if (fromDisk) {
+    customersCache = fromDisk;
+    return customersCache;
   }
+  customersCache = customersSeed.map((c) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    passwordHash: hashPassword(c.password),
+    stripeCustomerId: c.stripeCustomerId || null,
+  }));
+  await writeFileSafe(CUSTOMERS_FILE, customersCache);
+  return customersCache;
 }
 
 async function writeCustomers(list) {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(CUSTOMERS_FILE, JSON.stringify(list, null, 2));
+  customersCache = list;
+  await writeFileSafe(CUSTOMERS_FILE, list);
 }
 
 // Strip the password hash before returning a customer to callers.

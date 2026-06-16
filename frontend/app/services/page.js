@@ -1,6 +1,7 @@
 import Link from "next/link";
 import services from "@/data/services.json";
 import PageHeader from "@/components/PageHeader";
+import Reveal from "@/components/Reveal";
 
 // Services menu page. Groups all services by category and lists price +
 // duration for each. Fully responsive grid, theme-aware styling.
@@ -24,8 +25,8 @@ export default function ServicesPage() {
 
       {/* One section per category */}
       <div className="mx-auto max-w-5xl space-y-12 px-4 py-14 sm:px-6">
-        {Object.entries(categories).map(([category, items]) => (
-          <section key={category}>
+        {Object.entries(categories).map(([category, items], i) => (
+          <Reveal key={category} as="section" delay={(i % 2) * 80}>
             <h2 className="mb-5 border-b border-gray-200 pb-2 text-2xl font-bold dark:border-gray-700">
               {category}
             </h2>
@@ -65,7 +66,7 @@ export default function ServicesPage() {
                 </li>
               ))}
             </ul>
-          </section>
+          </Reveal>
         ))}
       </div>
     </div>

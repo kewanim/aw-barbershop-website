@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Reveal from "@/components/Reveal";
 
 // Customer "My Account" page.
 // - Logged out: shows a combined Login / Register card.
@@ -73,7 +74,7 @@ function Dashboard({ customer, onLogout }) {
       </div>
 
       {/* Booking & payment history */}
-      <section className="mt-10">
+      <Reveal as="section" className="mt-10">
         <h2 className="mb-4 text-xl font-bold">Visit & Payment History</h2>
         <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700">
           <table className="w-full min-w-[640px] text-left text-sm">
@@ -117,16 +118,16 @@ function Dashboard({ customer, onLogout }) {
             </tbody>
           </table>
         </div>
-      </section>
+      </Reveal>
 
       {/* Saved payment methods — comes alive in Phase 4b (Stripe) */}
-      <section className="mt-10">
+      <Reveal as="section" className="mt-10" delay={80}>
         <h2 className="mb-4 text-xl font-bold">Saved Payment Methods</h2>
         <div className="card text-sm text-gray-500 dark:text-gray-400">
           💳 Saving a card on file is coming soon. Once enabled, you&apos;ll be able
           to securely store a card here so checkout is one tap next time.
         </div>
-      </section>
+      </Reveal>
     </div>
   );
 }
